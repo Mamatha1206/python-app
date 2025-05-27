@@ -3,17 +3,24 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_IMAGE = "mamatha0124/python-app:${BUILD_NUMBER}"
+    }
+
     stages {
         stage('Build Python Project') {
             steps {
-                pythonBuild()
+                script {
+                    // Call the shared library method which now uses python3
+                    pythonBuild()
+                }
             }
         }
 
         stage('Docker Build & Push') {
             steps {
                 script {
-                    dockerImage = docker.build("mamatha0124/python-app:${BUILD_NUMBER}")
+                    dockerImage = docker.build("${DOCKER_IMAGE}")
                     docker.withRegistry('', 'DOCKER_CREDENTIALS_ID') {
                         dockerImage.push()
                     }
@@ -23,8 +30,10 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                sh 'kubectl apply -f k8s/deployment.yaml'
-                sh 'kubectl apply -f k8s/service.yaml'
+                script {
+                    sh 'kubectl apply -f k8s/deployment.yaml'
+                    sh 'kubectl apply -f k8s/service.yaml'
+                }
             }
         }
     }
