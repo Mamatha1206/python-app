@@ -14,7 +14,7 @@ pipeline {
             steps {
                 script {
                     dockerImage = docker.build("mamatha0124/python-app:${BUILD_NUMBER}")
-                    docker.withRegistry('', 'docker-hub-credentials') {
+                    docker.withRegistry('', 'DOCKER_CREDENTIALS_ID') {
                         dockerImage.push()
                     }
                 }
